@@ -1,16 +1,11 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  LayoutChangeEvent,
-  ViewStyle,
-  Animated,
-} from 'react-native';
+import {View, StyleSheet, LayoutChangeEvent, Animated} from 'react-native';
 
 import {AnimatedBottomBarIcon} from './AnimatedBottomBarIcon';
 
 type Props = {
   icons: string[];
+  defaultSelectedIndex?: number;
   onSelect: (index: number) => void;
 };
 
@@ -18,6 +13,19 @@ const ICON_WIDTH = 24;
 const DOT_WIDTH = 8;
 
 export function AnimatedBottomBar(props: Props) {
+  if (props.icons.length < 2) {
+    throw new Error('You should pass at least 2 icons');
+  }
+
+  if (
+    props.defaultSelectedIndex &&
+    props.defaultSelectedIndex > props.icons.length - 1
+  ) {
+    throw new Error(
+      'The default selected index should be less than the number of icons',
+    );
+  }
+
   function calculatePosition(index: number): number {
     const distanceBetweenIcons =
       (width - ICON_WIDTH * props.icons.length) / (props.icons.length - 1);
@@ -28,7 +36,9 @@ export function AnimatedBottomBar(props: Props) {
     );
   }
 
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [selectedIndex, setSelectedIndex] = React.useState(
+    props.defaultSelectedIndex || 0,
+  );
   const [width, setWidth] = React.useState(0);
   const [positionX] = React.useState(new Animated.Value(calculatePosition(0)));
 
@@ -40,6 +50,11 @@ export function AnimatedBottomBar(props: Props) {
       duration: 300,
     }).start();
   }
+
+  React.useEffect(() => {
+    if (!width) return;
+    positionX.setValue(calculatePosition(props.defaultSelectedIndex || 0));
+  }, [width]);
 
   function onLayout(e: LayoutChangeEvent) {
     setWidth(e.nativeEvent.layout.width);
@@ -56,15 +71,18 @@ export function AnimatedBottomBar(props: Props) {
   }
 
   return (
-    <View style={styles.bottomBar} onLayout={onLayout}>
-      <Animated.View style={[styles.dot, dotPosition()]} />
-      {props.icons.map((icon, index) => (
-        <AnimatedBottomBarIcon
-          name={icon}
-          selected={index === selectedIndex}
-          onPress={() => onSelect(index)}
-        />
-      ))}
+    <View>
+      <View style={styles.bottomBar} onLayout={onLayout}>
+        <Animated.View style={[styles.dot, dotPosition()]} />
+        {props.icons.map((icon, index) => (
+          <AnimatedBottomBarIcon
+            key={`icon_${index}_${icon}`}
+            name={icon}
+            selected={index === selectedIndex}
+            onPress={() => onSelect(index)}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -73,7 +91,7 @@ const styles = StyleSheet.create({
   bottomBar: {
     marginHorizontal: 40,
     marginTop: 10,
-    paddingBottom: 12,
+    paddingBottom: 18,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -83,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     borderRadius: DOT_WIDTH / 2,
     position: 'absolute',
-    bottom: 0,
+    bottom: 4,
     left: 0,
   },
 });

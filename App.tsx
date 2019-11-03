@@ -3,10 +3,13 @@ import {View, StyleSheet, SafeAreaView, Text} from 'react-native';
 
 import {AnimatedBottomBar} from './src/AnimatedBottomBar';
 
-const icons: string[] = ['home', 'lock', 'user'];
+const icons: string[] = ['home', 'lock', 'user', 'settings', 'pause'];
 
 export default function App() {
-  const [selectedIcon, setSelectedIcon] = React.useState(icons[0]);
+  const defaultIconIndex = 2;
+  const [selectedIcon, setSelectedIcon] = React.useState(
+    icons[defaultIconIndex],
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -15,6 +18,7 @@ export default function App() {
       </View>
       <AnimatedBottomBar
         icons={icons}
+        defaultSelectedIndex={defaultIconIndex}
         onSelect={index => setSelectedIcon(icons[index])}
       />
     </SafeAreaView>
