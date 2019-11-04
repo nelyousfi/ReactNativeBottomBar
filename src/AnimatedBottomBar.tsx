@@ -51,7 +51,7 @@ export function AnimatedBottomBar(props: Props) {
     }).start();
   }
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!width) return;
     positionX.setValue(calculatePosition(props.defaultSelectedIndex || 0));
   }, [width]);
